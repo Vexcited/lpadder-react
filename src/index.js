@@ -1,8 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Router from './Router';
+
+// PWA
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
+
+// Router
+import Router from './Router';
 
 ReactDOM.render(
   <React.StrictMode>

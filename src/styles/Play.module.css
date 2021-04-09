@@ -1,5 +1,5 @@
 .padSquare {
-    background-color: #e6e6ee;
+    background-color: var(--VirtualLaunchpad-padColor);
     margin: 2px;
     border-radius: 4px;
 
@@ -14,7 +14,4 @@
     font-family: arial, sans-serif;
     display: flex;
     justify-content: center;
-}
-
-.padRowsContainer {
 }

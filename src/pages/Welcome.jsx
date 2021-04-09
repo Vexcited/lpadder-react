@@ -10,7 +10,14 @@ export default function Welcome () {
     const [isAlreadyOpened, setAlreadyOpened] = useState(false);
     useEffect(() => {
         localforage.getItem("project")
-        .then(() => setAlreadyOpened(true))
+        .then(data => {
+            if (data !== null) {
+                setAlreadyOpened(true)
+            }
+            else {
+                setAlreadyOpened(false)
+            }
+        })
         .catch(() => setAlreadyOpened(false));
     }, [])
 
@@ -36,7 +43,7 @@ export default function Welcome () {
                 .then(() => {
                     // Reset file input for new imports...
                     e.target.value = null;
-                    history.push(`${process.env.PUBLIC_URL}/play`);
+                    history.push("/play");
                 })      
             })
         })
@@ -47,7 +54,7 @@ export default function Welcome () {
         localforage.setItem("project", emptyProject).then(() => {
             // To create a new project we need to have the project item
             console.log("startNewProject: localforage has been cleared.");
-            history.push(`${process.env.PUBLIC_URL}/play`);
+            history.push("/play");
         })
     };
 
@@ -55,7 +62,7 @@ export default function Welcome () {
         <div>
             <h1>Welcome to <strong>lpadder</strong> !</ h1>
             {isAlreadyOpened && 
-                <Link to={`${process.env.PUBLIC_URL}/play`}>Opened project detected ! Resume it</Link>
+                <Link to="/play">Opened project detected ! Resume it</Link>
             }
             
             <input type="file" accept=".zip" onChange={openFileHandler} />

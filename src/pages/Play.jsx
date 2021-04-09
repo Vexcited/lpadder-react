@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import {Howl, Howler} from 'howler';
+
+import styles from '../styles/Play.module.css';
+
 import localforage from 'localforage';
 import useDynamicRefs from 'use-dynamic-refs';
-import styles from '../styles/Play.module.css';
+
+import { Howl, Howler } from 'howler';
+import launchpad from "launchpad-midi-converter";
 
 export default function Play () {
     const [ samples, setSamples ] = useState({});
@@ -27,63 +31,79 @@ export default function Play () {
         })
         .catch (e => {
             console.error(`No file opened ! Redirected to <Welcome />...\n[Logs]`, e);
-            history.push(`${process.env.PUBLIC_URL}/`);
+            history.push("/");
         })
     }, []);
 
     // Change pads size
     const onSizePadsChange = (e) => {
-        console.log(e.target.value);
+        // console.log(e.target.value);
         document.documentElement.style.setProperty("--VirtualLaunchpad-padSize", `${e.target.value}px`)
     }
 
     return (
         <div>
             <h1>Play !</h1>
-            <VirtualLaunchpad />
+            <VirtualLaunchpad launchpadKey={0} />
             <input type="range" onInput={onSizePadsChange} min="1" max="127" />
         </div>
     );
 }
 
-function VirtualLaunchpad () {
-	const [getRef, setRef] =  useDynamicRefs();
+function VirtualLaunchpad ({ launchpadKey }) {
+	const [getRef, setRef] = useDynamicRefs();
+
+    /**
+     * Play the sample from Howler
+     */
+    const playSample = ({ note, launchpad }) => {
+        
+    }
+
+    const playLight = ({ note, launchpad }) => {
+        // TODO: check user settings
+        // if show played button is true then
+        const initialColor = document.documentElement.style.getPropertyValue("--VirtualLaunchpad-padColor");
+        
+        let el = getRef(`${launchpad}.${note}`).current
+        
+        el.style.backgroundColor = "#000";
+        setTimeout(() => el.style.backgroundColor = initialColor, 250)
+    }
 	
 	// Handle virtual clicks
-	const handleClick = (note, color) => {
-		console.log("VirtualLaunchpad: " + note + " has been played !");
-
-		const element = getRef(note).current;
-		const initialColor = "#e6e6ee";
-		
-		// Light the DOM !
-		element.style.backgroundColor = color;
-		setTimeout(() => element.style.backgroundColor = initialColor, 250)
+	// const handleClick = (note, color) => {
+	const handleClick = (evt) => {
+        console.log(`[VirtualLaunchpad] Clicked`, evt.target.dataset)
+        playSample (evt.target.dataset)
+        playLight (evt.target.dataset)
 	}
 	
 	// Generate the Virtual Launchpad to DOM
-	var rows = [];
-	for (var i = 8; i >= 1; i--) {
-		let row = []
-		for (var j = 1; j <= 8; j++){
-			let note = i + '' + j;
+    let layout = launchpad.layout("programmer");
+    let dom = []
 
-			row.push(
+    layout.forEach ((rows, key) => {
+        let row = [];
+
+        rows.forEach (pad => {
+            row.push(
 				<div className={styles.padSquare}
-					key={j}
-					data-note={note}
-					ref={setRef(note)}
-					onClick={(e) => handleClick(e.currentTarget.dataset.note, "#fff")}
+					key={pad}
+					data-note={pad}
+                    data-launchpad={launchpadKey}
+					ref={setRef(`${launchpadKey}.${pad}`)}
+					onClick={handleClick}
 				></div>
 			);
-		}
+        })
 
-		rows.push(
-		 	<div className={styles.padRow} key={i}>
-				{row}
-			</div>
-		);
-	}
+        dom.push(
+            <div className={styles.padRow} key={key}>
+               {row}
+           </div>
+        )
+    })
 	
-	return <div className={styles.padRowsContainer}>{rows}</div>;
+	return <div className={styles.padRowsContainer}>{dom}</div>;
 }
