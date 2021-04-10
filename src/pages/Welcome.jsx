@@ -30,23 +30,48 @@ export default function Welcome () {
             zip.file("cover.json").async("string")
             .then (data => {
                 let cover = JSON.parse(data);
-                console.log("openFileHandler: ", cover);
+                console.log("[openFileHandler] Cover parsing...");
     
                 // Fetching cover samples and lights
-                let samples = cover.samples;
-                let lights = cover.lights;
-                
-                // Store the cover for edit and play
-                localforage.setItem("project", {
-                    samples, lights 
-                })
+                let { samples, lights, metas } = cover;
+
+                localforage.setItem("samples", [])
                 .then(() => {
-                    // Reset file input for new imports...
-                    e.target.value = null;
-                    history.push("/play");
-                })      
-            })
-        })
+                    // Store the project for edit and play...
+                    localforage.setItem("project", {
+                        metas, samples, lights 
+                    })
+                    .then(() => {
+
+                        // Take every sample in "samples" folder
+                        // and store it in localforage as Base64
+                        zip.folder("samples").forEach((_, sampleFile) => {
+                            sampleFile.async("arraybuffer")
+                            .then(sampleData => {
+                                localforage.getItem("samples")
+                                .then(currentSamples => {
+                                    let newData = currentSamples.push({
+                                        fileName: sampleFile.name,
+                                        data: sampleData
+                                    })
+                                    localforage.setItem("samples", newData)
+                                    .then(() => {
+                                        console.log("Done with", sampleFile.name)
+                                    })
+                                });
+                            })
+                        })
+
+                            // Reset file input for new imports...
+                            e.target.value = null;
+
+                            // Redirecting to /play
+                            history.push("/play");
+                        });  
+                    
+                });
+            });
+        });
     }
 
     const startNewProject = () => {

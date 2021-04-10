@@ -17,20 +17,34 @@ export default function Play () {
     useEffect (() => {
         localforage.getItem("project")
         .then (project => {
-            let pages = project.samples
             let lights = project.lights
 
-            for (var samples in pages) {
-                if (pages.hasOwnProperty(samples)) {
-                    console.log(samples, pages[samples])
-                    pages[samples].forEach(sample => {
-                        console.log(sample.pad)
-                    });
+            // Number of launchpad used
+            for (let launchpads of project.samples) {
+
+                // Getting pages
+                for (let pages of launchpads) {
+
+                    // Every samples in `pages`
+                    for (let sample in pages) {
+                        if (pages.hasOwnProperty(sample)) {
+
+                            // Check if multi-sample or not
+                            if (Array.isArray(pages[sample])) {
+                                // TODO MULTISAMPLE
+                                console.log("is an array")
+                            }
+                            else {
+                                console.log("is an object")
+                            }
+                        }
+                    }
                 }
+
             }
         })
         .catch (e => {
-            console.error(`No file opened ! Redirected to <Welcome />...\n[Logs]`, e);
+            console.error(`No file opened ! Redirecting to <Welcome />...\n[Logs]`, e);
             history.push("/");
         })
     }, []);
