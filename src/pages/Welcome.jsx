@@ -4,6 +4,9 @@ import localforage from "localforage";
 import JSZip from "jszip";
 import styles from "../styles/main.module.css";
 
+// images
+import launchpadImage from "../images/launchpad.png"
+
 export default function Welcome() {
   const history = useHistory();
 
@@ -22,67 +25,69 @@ export default function Welcome() {
       .catch(() => setAlreadyOpened(false));
   }, []);
 
-    // When user open a new file
-    const openFileHandler = (e) => {
-        e.preventDefault();
-    
-        JSZip.loadAsync(e.target.files[0])
-        .then (zip => {
-            zip.file("cover.json").async("string")
-            .then (data => {
-                let cover = JSON.parse(data);
-                console.log("[openFileHandler] Cover parsing...");
-    
-                // Fetching cover samples and lights
-                let { samples, lights, metas } = cover;
+  // When user open a new file
+  const openFileHandler = (e) => {
+    e.preventDefault();
 
-                localforage.setItem("samples", [])
-                .then(() => {
-                    // Store the project for edit and play...
-                    localforage.setItem("project", {
-                        metas, samples, lights 
-                    })
-                    .then(() => {
+    // Load the ZIP file
+    JSZip.loadAsync(e.target.files[0]).then((zip) => {
 
-                        // Take every sample in "samples" folder
-                        // and store it in localforage as Base64
-                        zip.folder("samples").forEach((_, sampleFile) => {
-                            sampleFile.async("arraybuffer")
-                            .then(sampleData => {
-                                localforage.getItem("samples")
-                                .then(currentSamples => {
-                                    let newData = currentSamples.push({
-                                        fileName: sampleFile.name,
-                                        data: sampleData
-                                    })
-                                    localforage.setItem("samples", newData)
-                                    .then(() => {
-                                        console.log("Done with", sampleFile.name)
-                                    })
-                                });
-                                
-                                // Reset file input for new imports...
-                                e.target.value = null;
-                                
-                                // Redirecting to /play
-                                history.push("/play");
-                            });
-                        });
-                    });
-                });
-            });
-        });
-    }
+      // Grab the /cover.json file and read it...
+      zip.file("cover.json").async("string")
+      .then((data) => {
+
+        // Store the content of cover.json to localforage
+        data = JSON.parse(data)
+        localforage.setItem("project", data)
+        .then(() => {
+
+          // Reset `samples` in localforage to store new files
+          localforage.setItem("samples", [])
+          .then(() => {
+
+            // Grab every files of /samples/ folder and add the content to localforage
+            zip.folder("samples").forEach((_, sampleFile) => {
+              sampleFile
+              .async("arraybuffer")
+              .then((sampleData) => {
+
+                // Take the current samples and push the new sample
+                localforage.getItem("samples")
+                .then(samples => {
+                  samples.push({
+                    fileName: sampleFile.name,
+                    data: sampleData,
+                  });
+
+                  // Update the "samples" item
+                  localforage.setItem("samples", samples)
+                  .then(() => {
+                    console.log(`[localforage][samples] Added sample content "${sampleFile.name}"`);
+                  }); // set the file in localforage
+                }); // get current samples localforage
+              }); // sample data
+            }); // foreach samples
+
+            // Reset file input for new imports...
+            e.target.value = null;
+
+            // Redirect to /play
+            history.push("/play");
+            console.log("[Welcome][openFileHandler] Done ! Redirected to /play");
+          }); // reset samples localforage
+        }); // store cover.json localforage
+      }); // cover.json load
+    }); // ZIP load
+  }; // Function end
 
   const startNewProject = () => {
-    const emptyProject = { metas: {}, samples: {}, lights: {} };
-    localforage.setItem("project", emptyProject).then(() => {
-      localforage.setItem("samples", {})
+    const emptyProject = { metas: { songAuthor: "", coverAuthor: "", title: ""}, samples: {}, lights: {} };
+    localforage.setItem("project", emptyProject)
+    .then(() => {
+      localforage.setItem("samples", [])
       .then(() => {
-
-        // To create a new project we need to have the project item
-        console.log("startNewProject: localforage has been cleared.");
         history.push("/play");
+        console.log("[Welcome][startNewProject] localforage has been cleared ! Redirected to /play");
       });
     });
   };
@@ -129,7 +134,7 @@ export default function Welcome() {
           Welcome to <br /> lpadder !
         </h1>
         <p style={subText}>
-          All the tolls for yours launchpad online.{" "}
+          Play Launchpad covers from your browser !{" "}
           <Link to="/about" className={styles.link}>
             About this project...
           </Link>
@@ -142,7 +147,8 @@ export default function Welcome() {
         <button onClick={startNewProject}>Start something new</button>
       </div>
       <div style={right}>
-        <img src="../../assets/images/launchpad.png" alt="launchpad" />
+        
+        { /* Image height to fix: <img src={launchpadImage} alt="launchpad" /> */ }
       </div>
     </div>
   );

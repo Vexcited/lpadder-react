@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 
 import styles from '../styles/Play.module.css';
 
@@ -10,15 +10,15 @@ import { Howl, Howler } from 'howler';
 import launchpad from "launchpad-midi-converter";
 
 export default function Play () {
-    const [ samples, setSamples ] = useState({});
+    const [ project, setProject ] = useState({ metas: { title: "", songAuthor: "", coverAuthor: "" }});
+    const [ howlSamples, setHowlSamples ] = useState({});
     const history = useHistory();
 
     // Getting the samples
     useEffect (() => {
         localforage.getItem("project")
-        .then (project => {
-            let lights = project.lights
-
+        .then (setProject)
+/* TODO: after editor (samples loading logic)
             // Number of launchpad used
             for (let launchpads of project.samples) {
 
@@ -40,9 +40,7 @@ export default function Play () {
                         }
                     }
                 }
-
-            }
-        })
+*/
         .catch (e => {
             console.error(`No file opened ! Redirecting to <Welcome />...\n[Logs]`, e);
             history.push("/");
@@ -57,9 +55,11 @@ export default function Play () {
 
     return (
         <div>
-            <h1>Play !</h1>
+            <h1>{project.metas.title}</h1>
             <VirtualLaunchpad launchpadKey={0} />
             <input type="range" onInput={onSizePadsChange} min="1" max="127" />
+
+            <Link to="/editor">Go to editor</Link>
         </div>
     );
 }
