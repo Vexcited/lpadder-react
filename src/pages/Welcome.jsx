@@ -2,10 +2,14 @@ import { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import localforage from "localforage";
 import JSZip from "jszip";
-import styles from "../styles/main.module.css";
+
+import pagesStyles from "../styles/Welcome.style";
+
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@material-ui/core";
+import { InsertDriveFile, OpenInNew, Add } from '@material-ui/icons';
 
 // images
-import launchpadImage from "../images/launchpad.png"
+// import launchpadImage from "../images/launchpad.png"
 
 export default function Welcome() {
   const history = useHistory();
@@ -80,8 +84,19 @@ export default function Welcome() {
     }); // ZIP load
   }; // Function end
 
+
+  const [warningNewProjectModal, setWarningNewProjectModal] = useState(false);
   const startNewProject = () => {
-    const emptyProject = { metas: { songAuthor: "", coverAuthor: "", title: ""}, samples: {}, lights: {} };
+    if (isAlreadyOpened) {
+      setWarningNewProjectModal(true)
+    }
+    else {
+      projectEraseAndCreate();
+    }
+  };
+  
+  const projectEraseAndCreate = () => {
+    const emptyProject = { metas: { songAuthor: "", coverAuthor: "", title: "" }, samples: {}, lights: {} };
     localforage.setItem("project", emptyProject)
     .then(() => {
       localforage.setItem("samples", [])
@@ -90,68 +105,93 @@ export default function Welcome() {
         console.log("[Welcome][startNewProject] localforage has been cleared ! Redirected to /play");
       });
     });
-  };
-
-  const title = {
-    fontFamily: "Arvo",
-    fontSize: "5rem",
-    margin: "5% 20%",
-  };
-  const main = {
-    height: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-around",
-  };
-  const left = {
-    flex: "2",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-  };
-  const right = {
-    height: "100vh",
-    flex: "3",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "blue",
-  };
-  const subText = {
-    fontFamily: "Roboto",
-    margin: "5% 0",
-  };
-  const link = {
-    color: "black",
-  };
+  }
 
   return (
-    <div style={main}>
-      <div style={left}>
-        <h1 style={title}>
+    <div style={pagesStyles.mainContainer}>
+      <div style={pagesStyles.leftSide}>
+        <h1 style={pagesStyles.title}>
           Welcome to <br /> lpadder !
         </h1>
-        <p style={subText}>
+        <p style={pagesStyles.subText}>
           Play Launchpad covers from your browser !{" "}
-          <Link to="/about" className={styles.link}>
+          <Link to="/about" style={pagesStyles.link}>
             About this project...
           </Link>
         </p>
-        {isAlreadyOpened && (
-          <Link to="/play">Opened project detected ! Resume it</Link>
-        )}
-
-        <input type="file" accept=".zip" onChange={openFileHandler} />
-        <button onClick={startNewProject}>Start something new</button>
       </div>
-      <div style={right}>
+      <div style={pagesStyles.rightSide}>
+
+        {isAlreadyOpened && (
+            <Button
+              variant="contained"
+              style={pagesStyles.alreadyOpenedProjectButton}
+              onClick={() => history.push("/play")}
+            >
+              Opened project detected ! Resume it
+              <OpenInNew
+                style={pagesStyles.rightIconButton}
+              />
+            </Button>
+        )}
         
-        { /* Image height to fix: <img src={launchpadImage} alt="launchpad" /> */ }
+        <Button 
+          variant="contained"
+          style={pagesStyles.newProjectButton}
+          onClick={() => startNewProject()}
+        >
+          New Project
+          <Add 
+            style={pagesStyles.rightIconButton}
+          />
+        </Button>
+
+        <input
+          id="welcomeImportProjectButton"
+          type="file"
+          accept=".zip"
+          onChange={openFileHandler}
+          style={{ display: "none" }}
+        />
+
+        <label htmlFor="welcomeImportProjectButton">
+          <Button 
+            variant="outlined"
+            style={pagesStyles.importProjectButton}
+            component="span"
+          >
+            Import Project
+            <InsertDriveFile
+              style={pagesStyles.rightIconButton}
+            />
+          </Button>
+        </label>
+
+        <Dialog
+          open={warningNewProjectModal}
+          onClose={() => setWarningNewProjectModal(false)}
+          aria-labelledby="welcomeAlertDialogTitleNewProject"
+          aria-describedby="welcomeAlertDialogDescriptionNewProject"
+        >
+          <DialogTitle id="welcomeAlertDialogTitleNewProject">
+            {"Start a new project ?"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="welcomeAlertDialogDescriptionNewProject">
+              The currently open project will be erased if you start a new project, and
+              there's no way back !
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setWarningNewProjectModal(false)} autoFocus>
+              No !
+            </Button>
+            <Button onClick={() => projectEraseAndCreate()}>
+              Yep, start a new one
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </div>
   );
 }
-
-//todo: img path
