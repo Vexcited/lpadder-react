@@ -23,14 +23,38 @@ export default function Play () {
 
             if (data.samples) {
                 setNumberVLaunchpad(data.samples.length);
+
+                var samples = {}
+
                 for (let launchpadKey in data.samples) {
 
                     // Create a new virtual launchpad for every key
                     console.log(`[data.samples] Called VirtualLaunchpad for Launchpad "${launchpadKey}"`)
-                    
-                    console.log(numberVLaunchpad)
 
+                    
+                    for (let pages of data.samples[launchpadKey]) {
+                        Object.keys(pages).forEach((note, page) => {
+
+                            // Check if multi-sample or not
+                            if (Array.isArray(pages[note])) {
+                                pages[note].forEach ((mutlisample, mutlisampleKey) => {
+                                    if (Object.keys(samples[mutlisample["audio"]]).length === 0) {
+                                        samples[mutlisample["audio"]] = {}
+                                    }
+                                    samples[mutlisample["audio"]][`${launchpadKey}-${page}-${note}+${mutlisampleKey}`] = [mutlisample["start"], mutlisample["end"]]
+                                })
+                            }
+                            else {
+                                if (Object.keys(samples[pages[note]["audio"]]).length === 0) {
+                                    samples[pages[note]["audio"]] = {}
+                                }
+                                samples[pages[note]["audio"]][`${launchpadKey}-${page}-${note}`] = [pages[note]["start"], pages[note]["end"]]
+                            }
+                        });
+                    }
                 }
+
+                console.log(samples)
             }
             else {
                 console.error("Error in the JSON file: `(root).samples` is missing.")
