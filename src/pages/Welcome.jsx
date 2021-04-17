@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useHistory } from "react-router-dom";
 import localforage from "localforage";
 import JSZip from "jszip";
@@ -13,6 +13,8 @@ import { InsertDriveFile, OpenInNew, Add } from '@material-ui/icons';
 
 export default function Welcome() {
   const history = useHistory();
+
+  const importFileInput = useRef(null);
 
   // Check if a project was already loaded locally...
   const [isAlreadyOpened, setAlreadyOpened] = useState(false);
@@ -96,7 +98,12 @@ export default function Welcome() {
   };
   
   const projectEraseAndCreate = () => {
-    const emptyProject = { metas: { songAuthor: "", coverAuthor: "", title: "" }, samples: {}, lights: {} };
+    const emptyProject = {
+      metas: { title: "Untitled", songAuthor: "Nobody", coverAuthor: "Someone" },
+      samples: [],
+      lights: []
+    }
+
     localforage.setItem("project", emptyProject)
     .then(() => {
       localforage.setItem("samples", [])
@@ -147,37 +154,34 @@ export default function Welcome() {
         </Button>
 
         <input
-          id="welcomeImportProjectButton"
+          ref={importFileInput}
           type="file"
           accept=".zip"
           onChange={openFileHandler}
           style={{ display: "none" }}
         />
 
-        <label htmlFor="welcomeImportProjectButton">
-          <Button 
-            variant="outlined"
-            style={pagesStyles.importProjectButton}
-            component="span"
-          >
-            Import Project
-            <InsertDriveFile
-              style={pagesStyles.rightIconButton}
-            />
-          </Button>
-        </label>
+        <Button 
+          variant="outlined"
+          style={pagesStyles.importProjectButton}
+          component="span"
+          onClick={() => importFileInput.current.click()}
+        >
+          Import Project
+          <InsertDriveFile
+            style={pagesStyles.rightIconButton}
+          />
+        </Button>
 
         <Dialog
           open={warningNewProjectModal}
           onClose={() => setWarningNewProjectModal(false)}
-          aria-labelledby="welcomeAlertDialogTitleNewProject"
-          aria-describedby="welcomeAlertDialogDescriptionNewProject"
         >
-          <DialogTitle id="welcomeAlertDialogTitleNewProject">
+          <DialogTitle>
             {"Start a new project ?"}
           </DialogTitle>
           <DialogContent>
-            <DialogContentText id="welcomeAlertDialogDescriptionNewProject">
+            <DialogContentText>
               The currently open project will be erased if you start a new project, and
               there's no way back !
             </DialogContentText>

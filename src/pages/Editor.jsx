@@ -6,7 +6,11 @@ import { useHistory } from "react-router-dom";
 export default function Editor() {
 
     const history = useHistory();
-    const [ project, setProject ] = useState({ metas: { title: "", songAuthor: "", coverAuthor: "" }});
+    const [ project, setProject ] = useState({
+        metas: { title: "Untitled", songAuthor: "Nobody", coverAuthor: "Someone" },
+        samples: [],
+        lights: []
+    });
 
     useEffect (() => {
         localforage.getItem("project")
@@ -28,7 +32,14 @@ export default function Editor() {
         .catch(e => {
             console.error("An error as occured !", e)
         })
-    } 
+    }
+
+    const addLaunchpad = (e) => {
+        e.preventDefault()
+
+        project.samples.push([])
+        setProject({...project})
+    }
 
     return (
         <div>
@@ -54,6 +65,15 @@ export default function Editor() {
                 onClick={applyChanges}
             >
                 Apply changes !
+            </button>
+
+
+            <span>Number of launchpad: {project.samples.length}</span>
+
+            <button
+                onClick={addLaunchpad}
+            >
+                Add a Launchpad
             </button>
         </div>
     );
