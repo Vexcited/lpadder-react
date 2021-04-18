@@ -5,7 +5,7 @@ import Forage from "react-localforage";
 import JSZip from "jszip";
 import "../styles/Welcome.scss";
 
-import pagesStyles from "../styles/Welcome.style";
+//import pagesStyles from "../styles/Welcome.style";
 
 import {
   Button,
