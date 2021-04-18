@@ -119,10 +119,15 @@ export default function Welcome() {
     });
   };
 
-  var project;
+  const [project, setProject] = useState({
+    metas: { title: "", songAuthor: "", coverAuthor: "" },
+  });
 
-  localforage.getItem("project").then((data) => {
-    project = data;
+  useEffect(() => {
+    localforage.getItem("project").then((data) => {
+      // Save the project in state
+      setProject(data);
+    });
   });
 
   return (
@@ -170,8 +175,8 @@ export default function Welcome() {
           <div className="opened">
             <hr />
             <p className="openedText">
-              <span className="musicName">test</span>{" "}
-              <span className="authorName">by petit biscuit</span>
+              <span className="musicName">{project.metas.title}</span>
+              <span className="authorName">by {project.metas.songAuthor}</span>
             </p>
             <Button
               variant="contained"
