@@ -1,101 +1,156 @@
-import { useEffect, useState } from 'react';
-import { useHistory, Link } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useHistory, Link } from "react-router-dom";
 
-import localforage from 'localforage';
+// Project
+import localforage from "localforage";
 
-import { Howl, Howler } from 'howler';
+// Audio
+import { Howl, Howler } from "howler";
 
+// Components
 import VirtualLaunchpad from "../components/VirtualLaunchpad";
 
-export default function Play () {
-    const [ project, setProject ] = useState({ metas: { title: "", songAuthor: "", coverAuthor: "" }});
-    const [ howlSamples, setHowlSamples ] = useState({});
+export default function Play() {
+  const history = useHistory();
 
-    const [ numberVLaunchpad, setNumberVLaunchpad ] = useState(0)
+  const [project, setProject] = useState({
+    metas: { title: "", songAuthor: "", coverAuthor: "" },
+  });
+  const [numberVLaunchpad, setNumberVLaunchpad] = useState(0);
 
-    const history = useHistory();
+  const [howlSamples, setHowlSamples] = useState({});
 
-    // Getting the samples
-    useEffect (() => {
-        localforage.getItem("project")
-        .then (data => {
-            setProject(data);
+	const startToStoreInHowler = (howlerValues) => {
+		localforage.getItem("samples")
+		.then(audios => {
+			for (let audioFileName in howlerValues) {
+				if (howlerValues.hasOwnProperty(audioFileName)) {
+					let audioData = audios[audioFileName]
+					
+					let howlerInstance = new Howl({
+						src: [audioData],
+						sprite: howlerValues[audioFileName],
+						onend: function() {
+							console.log('Finished with', audioFileName);
+						}
+					})
 
-            if (data.samples) {
-                setNumberVLaunchpad(data.samples.length);
+					let toStore = {
+						...howlSamples
+					}
+					toStore[audioFileName] = howlerInstance
+					setHowlSamples(toStore)
 
-                var samples = {}
+					console.log("Stored", toStore)
+				}
+			}
+		})
+	}
 
-                for (let launchpadKey in data.samples) {
+  // Getting the samples
+  useEffect(() => {
+    localforage
+      .getItem("project")
+      .then((data) => {
+        // Save the project in state
+        setProject(data);
 
-                    // Create a new virtual launchpad for every key
-                    console.log(`[data.samples] Called VirtualLaunchpad for Launchpad "${launchpadKey}"`)
+        // Retreive samples from state
+        if (data.samples) {
+          // Create the <VirtualLaunchpad />s
+          setNumberVLaunchpad(data.samples.length);
 
-                    
-                    for (let pages of data.samples[launchpadKey]) {
-                        Object.keys(pages).forEach((note, page) => {
+          // Samples that will be passed in Howler
+          let spritesForHowler = {};
 
-                            // Check if multi-sample or not
-                            if (Array.isArray(pages[note])) {
-                                pages[note].forEach ((mutlisample, mutlisampleKey) => {
-                                    if (Object.keys(samples[mutlisample["audio"]]).length === 0) {
-                                        samples[mutlisample["audio"]] = {}
-                                    }
-                                    samples[mutlisample["audio"]][`${launchpadKey}-${page}-${note}+${mutlisampleKey}`] = [mutlisample["start"], mutlisample["end"]]
-                                })
-                            }
-                            else {
-                                if (Object.keys(samples[pages[note]["audio"]]).length === 0) {
-                                    samples[pages[note]["audio"]] = {}
-                                }
-                                samples[pages[note]["audio"]][`${launchpadKey}-${page}-${note}`] = [pages[note]["start"], pages[note]["end"]]
-                            }
-                        });
-                    }
-                }
+          // For every Launchpads defined in project
+          data.samples.forEach((thisLaunchpad_pages, launchpad_key) => {
 
-                console.log(samples)
+						// For every defined page_name in thisLaunchpad_pages
+            for (let page_name in thisLaunchpad_pages) {
+              if (thisLaunchpad_pages.hasOwnProperty(page_name)) {
+
+								for (let note_id in thisLaunchpad_pages[page_name]) {
+									if (thisLaunchpad_pages[page_name].hasOwnProperty(note_id)) {
+										let current_note_id = thisLaunchpad_pages[page_name][note_id]
+
+										// Multi-sample (so an Array [])
+										if (Array.isArray(current_note_id)) {
+											// For every samples, ...
+											current_note_id.forEach((sample, sample_key) => {
+												// Number of the launchpad - Page Number - Note ID + Key of the sample in the array
+												// Eg.: 0-Page 1 -11+0 (Launchpad 0 on Page {page_name}, on Note 11 with sample 0 of the array)
+												let sampleID = `${launchpad_key}.${page_name}.${note_id}+${sample_key}`;
+												let audioFileName = sample["audio"];
+		
+												// Sprite to be stored in Howler
+												let spriteToStore = [
+													sample["start"], // Start (in ms)
+													sample["end"], // Duration
+												];
+		
+												// Check if the audioFileName has been already defined in `spritesForHowler` or not.
+												spritesForHowler[audioFileName] =
+													spritesForHowler[audioFileName] || {};
+		
+												// Store the sample
+												spritesForHowler[audioFileName][sampleID] = spriteToStore;
+											});
+										}
+										// Only one sample (so basically an Object {})
+										else {
+											let sample = current_note_id;
+		
+											// Number of the launchpad - Page Number - Note ID
+											let sampleID = `${launchpad_key}-${page_name}-${note_id}`;
+											let audioFileName = sample["audio"];
+		
+											// Check if the audioFileName has been already defined in `spritesForHowler` or not.
+											spritesForHowler[audioFileName] =
+												spritesForHowler[audioFileName] || {};
+		
+											// Sprite to be stored in Howler
+											let spriteToStore = [
+												sample["start"], // Start (in ms)
+												sample["end"], // Duration
+											];
+		
+											// Store the sample
+											spritesForHowler[audioFileName][sampleID] = spriteToStore;
+										}
+
+									}
+								}
+              }
             }
-            else {
-                console.error("Error in the JSON file: `(root).samples` is missing.")
-            }
-        })
-/* TODO: after editor (samples loading logic)
-            // Number of launchpad used
-            for (let launchpads of project.samples) {
+          });
 
-                // Getting pages
-                for (let pages of launchpads) {
+					startToStoreInHowler(spritesForHowler)
+        }
+				else {
+          console.error("Error in the JSON file: `(root).samples` is missing.");
+        }
+      })
+      .catch((e) => {
+        console.error(
+          `Error happened ! Redirecting to <Welcome />...\n[Logs]`,
+          e
+        );
+        history.push("/");
+      });
+  }, []);
 
-                    // Every samples in `pages`
-                    for (let sample in pages) {
-                        if (pages.hasOwnProperty(sample)) {
+  return (
+    <div>
+      <h1>{project.metas.title}</h1>
 
-                            // Check if multi-sample or not
-                            if (Array.isArray(pages[sample])) {
-                                // TODO MULTISAMPLE
-                                console.log("is an array")
-                            }
-                            else {
-                                console.log("is an object")
-                            }
-                        }
-                    }
-                }
-*/
-        .catch (e => {
-            console.error(`No file opened ! Redirecting to <Welcome />...\n[Logs]`, e);
-            history.push("/");
-        })
-    }, []);
+      {Array(numberVLaunchpad)
+        .fill(0)
+        .map((_, key) => (
+          <VirtualLaunchpad key={key} launchpadKey={key} />
+        ))}
 
-    return (
-        <div>
-            <h1>{project.metas.title}</h1>
-
-            {Array(numberVLaunchpad).fill(0).map((_, key) => <VirtualLaunchpad key={key} launchpadKey={key} />)}
-
-            <Link to="/editor">Go to editor</Link>
-        </div>
-    );
+      <Link to="/editor">Go to editor</Link>
+    </div>
+  );
 }

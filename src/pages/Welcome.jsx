@@ -3,6 +3,7 @@ import { Link, useHistory } from "react-router-dom";
 import localforage from "localforage";
 import JSZip from "jszip";
 
+// Style
 import pagesStyles from "../styles/Welcome.style";
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@material-ui/core";
@@ -48,7 +49,7 @@ export default function Welcome() {
         .then(() => {
 
           // Reset `samples` in localforage to store new files
-          localforage.setItem("samples", [])
+          localforage.setItem("samples", {})
           .then(() => {
 
             // Grab every files of /samples/ folder and add the content to localforage
@@ -60,10 +61,7 @@ export default function Welcome() {
                 // Take the current samples and push the new sample
                 localforage.getItem("samples")
                 .then(samples => {
-                  samples.push({
-                    fileName: sampleFile.name,
-                    data: sampleData,
-                  });
+                  samples[sampleFile.name.replace("samples/", "")] = sampleData
 
                   // Update the "samples" item
                   localforage.setItem("samples", samples)
@@ -106,7 +104,7 @@ export default function Welcome() {
 
     localforage.setItem("project", emptyProject)
     .then(() => {
-      localforage.setItem("samples", [])
+      localforage.setItem("samples", {})
       .then(() => {
         history.push("/play");
         console.log("[Welcome][startNewProject] localforage has been cleared ! Redirected to /play");
