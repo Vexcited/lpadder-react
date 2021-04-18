@@ -1,0 +1,140 @@
+.mainContainer {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.leftSide {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Roboto', sans-serif;
+}
+
+.rightSide {
+  height: 100vh;
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: black;
+  overflow: hidden;
+}
+
+.title {
+  font-family: Arvo;
+  font-size: 5rem;
+  margin: 5% 20%;
+}
+
+.subtext {
+  font-family: Roboto;
+  margin: 5% 0;
+}
+
+.link {
+    color: black;
+    border: solid 2px black;
+    display: block;
+    padding: 10px;
+    text-align: center;
+    margin: 20px;
+    border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;
+    -o-border-radius: 3px;
+    text-decoration: none;
+    transition: all 0.2s;    
+    -webkit-transition: all 0.2s;
+    -moz-transition: all 0.2s;
+    -ms-transition: all 0.2s;
+    -o-transition: all 0.2s;
+    &:hover{
+      background-color: black;
+      color: white;
+    }
+}
+
+.newProjectButton {
+  background: white;
+  color: black;
+  border-radius: 3px;
+  border: 0;
+  height: 48px;
+  padding: 0 30px;
+  margin: 5px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+}
+
+.importProjectButton {
+  background: black !important;
+  color: white !important;
+  border-radius: 3px !important;
+  border: solid 2px white !important;
+  height: 48px !important;
+  padding: 0 30px !important;
+  margin: 5px !important;
+  -webkit-border-radius: 3px !important;
+  -moz-border-radius: 3px !important;
+  -ms-border-radius: 3px !important;
+  -o-border-radius: 3px !important;
+}
+
+.alreadyOpenedProjectButton {
+  background: white !important;
+  color: black;
+  border-radius: 5px !important;
+  margin: 15px 0 !important;
+  width: 65%;
+  box-shadow: unset !important;
+  padding: 10px 5px !important;
+  -webkit-border-radius: 5px !important;
+  -moz-border-radius: 5px !important;
+  -ms-border-radius: 5px !important;
+  -o-border-radius: 5px !important;
+}
+
+.rightIconButton {
+  margin-left: 8px;
+}
+
+Button {
+  margin: 10px !important;
+}
+
+.opened{
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 60%;
+}
+
+hr{
+  width: 70%;
+  margin: 20px;
+}
+
+.openedText{
+  margin: 20px;
+  font-family: 'Roboto', sans-serif; 
+}
+.musicName{
+  font-weight: bold;
+  color: rgb(255, 255, 255);
+  display: block;
+  margin: 10px;
+}
+.authorName{  
+  color: rgba(214, 214, 214, 0.8); 
+  display: block;
+  margin: 10px;
+}
