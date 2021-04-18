@@ -5,7 +5,12 @@ import Forage from "react-localforage";
 import JSZip from "jszip";
 import "../styles/Welcome.scss";
 
+<<<<<<< HEAD
 //import pagesStyles from "../styles/Welcome.style";
+=======
+// Style
+import pagesStyles from "../styles/Welcome.style";
+>>>>>>> refs/remotes/origin/main
 
 import {
   Button,
@@ -47,6 +52,7 @@ export default function Welcome() {
     // Load the ZIP file
     JSZip.loadAsync(e.target.files[0]).then((zip) => {
       // Grab the /cover.json file and read it...
+<<<<<<< HEAD
       zip
         .file("cover.json")
         .async("string")
@@ -87,6 +93,49 @@ export default function Welcome() {
             }); // reset samples localforage
           }); // store cover.json localforage
         }); // cover.json load
+=======
+      zip.file("cover.json").async("string")
+      .then((data) => {
+
+        // Store the content of cover.json to localforage
+        data = JSON.parse(data)
+        localforage.setItem("project", data)
+        .then(() => {
+
+          // Reset `samples` in localforage to store new files
+          localforage.setItem("samples", {})
+          .then(() => {
+
+            // Grab every files of /samples/ folder and add the content to localforage
+            zip.folder("samples").forEach((_, sampleFile) => {
+              sampleFile
+              .async("arraybuffer")
+              .then((sampleData) => {
+
+                // Take the current samples and push the new sample
+                localforage.getItem("samples")
+                .then(samples => {
+                  samples[sampleFile.name.replace("samples/", "")] = sampleData
+
+                  // Update the "samples" item
+                  localforage.setItem("samples", samples)
+                  .then(() => {
+                    console.log(`[localforage][samples] Added sample content "${sampleFile.name}"`);
+                  }); // set the file in localforage
+                }); // get current samples localforage
+              }); // sample data
+            }); // foreach samples
+
+            // Reset file input for new imports...
+            e.target.value = null;
+
+            // Redirect to /play
+            history.push("/play");
+            console.log("[Welcome][openFileHandler] Done ! Redirected to /play");
+          }); // reset samples localforage
+        }); // store cover.json localforage
+      }); // cover.json load
+>>>>>>> refs/remotes/origin/main
     }); // ZIP load
   }; // Function end
 
@@ -110,8 +159,15 @@ export default function Welcome() {
       lights: [],
     };
 
+<<<<<<< HEAD
     localforage.setItem("project", emptyProject).then(() => {
       localforage.setItem("samples", []).then(() => {
+=======
+    localforage.setItem("project", emptyProject)
+    .then(() => {
+      localforage.setItem("samples", {})
+      .then(() => {
+>>>>>>> refs/remotes/origin/main
         history.push("/play");
         console.log(
           "[Welcome][startNewProject] localforage has been cleared ! Redirected to /play",

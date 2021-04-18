@@ -1,0 +1,38 @@
+{
+    "metas": {
+        "songAuthor": "Vexcited",
+        "coverAuthor": "Vexcited",
+        "title": "Example"
+    },
+    "samples": [
+        {
+            "Page 1 - Intro": {
+                "11": {
+                    "audio": "kick.wav",
+                    "start": 0,
+                    "end": 1000,
+                    "light": "intro-kick"
+                },
+                "12": [
+                    {
+                        "audio": "kick.wav",
+                        "start": 0,
+                        "end": 1000,
+                        "light": "intro-kick"
+                    }, 
+                    {
+                        "audio": "kick.wav",
+                        "start": 0,
+                        "end": 1000,
+                        "light": "intro-kick"
+                    }
+                ]
+            }
+        }
+    ],
+    "lights": {
+        "intro-kick": [
+
+        ]
+    }
+}
