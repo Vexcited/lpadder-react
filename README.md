@@ -2,7 +2,7 @@
 
 Perform Launchpad covers on your browser !
 I'm doing this for fun, but why not taking it seriously, 
-if anyone whants to help, then open /src/ and start to read !
+if anyone wants to help, then open /src/ and start to read !
 
 # Currently on build !
 
